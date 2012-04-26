@@ -23,7 +23,6 @@ module KAuth
 
     def get_request_token(oauth_callback=nil)
       @oauth_callback = oauth_callback
-      p '-----------> get rtokne'
       body = ''
       if oauth_callback
         body = get_ssl @rtoken_path, :oauth_callback=>oauth_callback
@@ -54,14 +53,17 @@ module KAuth
     def get_no_ssl(path, opts={})
       get('http://', path, opts)
     end
-    def post(pre, path, file, opts={})
-      url = pre+@base_url+path
+    def post(path, file, opts={})
+      base_url_str =  opts[:site] ? opts.delete(:site) : @base_url
+      url = base_url_str+path
       params = get_params 'POST', url, opts 
-      uri = URI.encode_www_form params
+      uri = URI(url)
+      uri.query = URI.encode_www_form params
       RestClient.post(uri.to_s, :my_file => file)
     end
     def get(pre, path, opts={})
-      url = pre+@base_url + path
+      base_url_str =  opts[:site] ? opts.delete(:site) : @base_url
+      url = pre+base_url_str+path
       params = get_params 'GET', url, opts
       uri = URI(url)
       uri.query = URI.encode_www_form params
@@ -89,7 +91,7 @@ module KAuth
       end
       def get_base_params
         {
-          :oauth_nonce => "xcWcZhCNKFJ#{Random.new().rand(1000)}",
+          :oauth_nonce => "xcWcZhCNKFJ#{Random.new().rand(10000000)}",
           :oauth_timestamp => "#{Time.new.to_i}"
         }.merge(@options)
       end

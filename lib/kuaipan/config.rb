@@ -3,20 +3,26 @@ module Kuaipan
     class << self
       extend Forwardable
       def_delegators :options, :[]
-      attr_accessor :ctoken, :csecret, :options
-      def opts(consumer_token, consumer_secret, p={})
-        Config.ctoken, Config.csecret = consumer_token, consumer_secret
+      attr_accessor :options
+      def opts(consumer_key, consumer_secret, p={})
         Config.options = {
-        :oauth_signature_method => 'HMAC-SHA1',
-        :oauth_version => '1.0',
-        :oauth_consumer_key => consumer_token,
-        :site => 'openapi.kuaipan.cn',
-        :rtoken_path => '/open/requestToken',
-        :atoken_path => '/open/accessToken',
-        :authorize_url => 'https://www.kuaipan.cn/api.php?ac=open&op=authorise',
-        :account_info_path => '/account_info',
-        :upload_locate_path => '/fileops/upload_locate'
-        }.merge(p)
+          :oauth_consumer_secret => consumer_secret,
+          :oauth_consumer_key => consumer_key,
+          :root => 'app_folder',
+          :oauth_signature_method => 'HMAC-SHA1',
+          :oauth_version => '1.0',
+
+          :site => 'openapi.kuaipan.cn',
+          :thum_doc_site => 'conv.kuaipan.cn',
+          :up_down_file_stie => 'api-content.dfs.kuaipan.cn',
+          :rtoken_path => '/open/requestToken',
+          :atoken_path => '/open/accessToken',
+          :authorize_url => 'https://www.kuaipan.cn/api.php?ac=open&op=authorise',
+
+          :account_info_path => '/account_info',
+          :metadata_path => '/metadata',
+          :shares_path => '/shares'
+          }.merge(p)
       end
       def options_base
         {
