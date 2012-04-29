@@ -9,6 +9,16 @@ require 'net/http'
 
 module KAuth
   class Consumer
+    # determine the certificate authority path to verify SSL certs
+    CA_FILES = %w(/etc/ssl/certs/ca-certificates.crt /usr/share/curl/curl-ca-bundle.crt /etc/ssl/certs/ca-bundle.trust.crt)
+    CA_FILES.each do |ca_file|
+      if File.exists?(ca_file)
+        CA_FILE = ca_file
+        break
+      end
+    end
+    CA_FILE = nil unless defined?(CA_FILE)
+
     def initialize(ctoken, csecret, opts={})
       @oauth_consumer_secret = csecret
       @base_url = opts.delete(:site)
@@ -24,8 +34,10 @@ module KAuth
       if oauth_callback
         opts[:oauth_callback] = oauth_callback
       end
-      body = get('https://', @rtoken_path, opts)
+      res = get('https://', @rtoken_path, opts)
+      body = res.body
       hash = JSON.parse(body)
+
       hash.each do |pair|
         instance_variable_set('@' + pair[0], pair[1])
       end
@@ -33,10 +45,11 @@ module KAuth
     end
 
     def set_atoken(oauth_verifier)
-      body = get('https://', 
+      res = get('https://', 
                  @atoken_path, 
                  {oauth_token: @oauth_token,
                   oauth_verifier: oauth_verifier})
+      body = res.body
       hash = JSON.parse(body)
       hash.each do |pair|
         instance_variable_set("@#{ pair[0] }" , pair[1])
@@ -90,15 +103,37 @@ module KAuth
         base_url_str =  opts[:site] ? opts.delete(:site) : @base_url
         url = "#{ pre }#{ base_url_str }#{ path }"
         params = get_params('GET', url, opts)
+        fetch(url, params)
+#fetch(url, 'GET', opts)
+      end
+
+      def fetch(url, params, limit=10)
+#params = get_params(http_method, url, opts)
+        raise TooManyRedirect, 'too many redirect!' if limit == 0
+        
         uri = URI(url)
         uri.query = URI.encode_www_form(params)
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = uri.scheme == 'https'
-        http.ca_file = "/etc/ssl/certs/ca-bundle.trust.crt"
+        http.ca_file = CA_FILE
         request = Net::HTTP::Get.new(uri.request_uri)
+        
         response = http.request(request)
-        p response.body
-        body = response.body if response.is_a?(Net::HTTPSuccess)
+        case response
+        when Net::HTTPRedirection
+          location = response['location']
+          uri = URI(location)
+          req = Net::HTTP::Get.new(uri.request_uri)
+          req['Cookie'] = response['set-cookie']
+          res = Net::HTTP.start(uri.hostname, uri.port) {|http|
+              http.request(req)
+          }
+#response = Net::HTTP.get_response(uri, {'Cookie' => response['set-cookie']})
+#fetch(location, cookie)
+#fetch(location, http_method, opts, limit - 1)
+        else
+          response
+        end  
       end
 
       def self.get_base_string(params, url, http_method)
@@ -106,7 +141,7 @@ module KAuth
         params.sort.each do |pair|
           param_str_arr << "#{ urlencode(pair[0].to_s) }=#{ urlencode(pair[1].to_s) }"  
         end
-        p "#{http_method}&#{urlencode url}&#{urlencode param_str_arr.join('&')}"
+        "#{http_method}&#{urlencode url}&#{urlencode param_str_arr.join('&')}"
       end
 
       def self.urlencode(str)
@@ -118,6 +153,15 @@ module KAuth
         #end
         URI.escape(str, /([^A-Za-z0-9\-._~])/)
       end
-
+      
   end
+
+  class KAuthError < StandardError
+    attr_reader :res
+    def initialize(res)
+      @res = res
+      super
+    end
+  end
+  class TooManyRedirect < StandardError; end
 end

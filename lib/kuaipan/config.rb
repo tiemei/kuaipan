@@ -18,7 +18,10 @@ module Kuaipan
                           up_down_file_stie: 'api-content.dfs.kuaipan.cn',
                           rtoken_path: '/open/requestToken',
                           atoken_path: '/open/accessToken',
-                          authorize_url: 'https://www.kuaipan.cn/api.php?ac=open&op=authorise'}.merge(p)
+                          authorize_url: 'https://www.kuaipan.cn/api.php?ac=open&op=authorise',
+                          types: %w(pdf doc wps csv prn xls et ppt dps txt rtf),
+                          views: %w(normal android iPad iphone)
+          }.merge(p)
       end
 
       def options_base

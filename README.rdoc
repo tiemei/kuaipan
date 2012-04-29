@@ -1,10 +1,31 @@
-kuaipan.gem - the third part SDK of kuaipan@kingsoft.com
-=======
+= kuaipan.gem - the third part SDK of kuaipan@kingsoft.com
 To install the gem simply enter:
   gem install kuaipan --pre
 To see an example of how it works enter the following into your terminal:
   git clone git://github.com/tiemei/kuaipan-example.git
   cd kuaipan-example
   ruby example.rb
- 
 
+----------- 
+= how to use ?
+  require 'kuaipan'
+  class YouAPI < Kuaipan::OpenAPI
+    def your_method
+      # 1 config
+      consumer_key = 'YourConsumerKey'
+      consumer_secret = 'YourConsumerSecret'
+      input_config(consumer_key, consumer_secret)
+      
+      # 2 authorize
+      # k_session = g_session() # ok!
+      # k_session = g_session(:oauth_callback => 'Your callbake url') # ok!
+      # authorize_url = k_session[:authorize_url]
+      # user input their username+pwd
+      # then you should parse oauth_verifier
+      
+      # 3 use Kuaipan API(such as download file, upload file...)
+      # please refer to test/test_client.rb
+      k_session.account_info['user_id'] # get user_id
+    end
+  end
+    
