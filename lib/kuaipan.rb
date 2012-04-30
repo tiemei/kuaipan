@@ -21,6 +21,10 @@ module Kuaipan
     def g_session(opt={})
       Kuaipan::Session.new(opt)
     end
+    
+    def g_session_skip_oauth(oauth_token, oauth_token_secret, user_id, opts={})
+      Kuaipan::Session.skip_oauth_session(oauth_token, oauth_token_secret, user_id, opts={}) 
+    end
   end
 
 

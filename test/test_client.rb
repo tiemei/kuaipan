@@ -8,12 +8,26 @@ class ClientTest < Test::Unit::TestCase
   def test_open_api
     ct, cs = 'xcWcZhCNKFJz1H8p', '8RvkM0aGYiQF5kJF'
     input_config ct, cs
-    k_session = g_session 
-    authorize_url = k_session[:authorize_url]
-    p 'please input this url to your browser,then copy authorization code here:'
-    p authorize_url
-    oauth_verifier = gets
-    k_session.set_atoken oauth_verifier
+    k_session = nil
+    oauth_result_file = 'oauth_result.json'
+    if File.exist?(oauth_result_file)
+      File.open(oauth_result_file, 'r')do |f|
+        oauth_result = JSON.parse(f.read)
+        k_session = g_session_skip_oauth(oauth_result['oauth_token'],
+                                         oauth_result['oauth_token_secret'],
+                                         oauth_result['user_id'])
+      end
+    else
+      k_session = g_session 
+      authorize_url = k_session[:authorize_url]
+      p 'please input this url to your browser,then copy authorization code here:'
+      p authorize_url
+      oauth_verifier = gets
+      oauth_result = k_session.set_atoken oauth_verifier
+      File.open(oauth_result_file,'w+')do |f|
+        f.write(JSON.generate(oauth_result))
+      end
+    end
     
 
     # get account info
@@ -26,7 +40,7 @@ class ClientTest < Test::Unit::TestCase
     folder = '/tiemei_kuaipan_test/test'
     begin
       assert_equal 'ok', k_session.create_folder(folder)['msg']
-      assert_not_nil k_session.metadata('tiemei_kuaipan_test')['root']
+      assert_not_nil k_session.metadata('/tiemei_kuaipan_test')['root']
       assert_equal 'ok', k_session.create_folder(folder)['msg']
     ensure
       k_session.delete('/tiemei_kuaipan_test')
@@ -49,20 +63,20 @@ class ClientTest < Test::Unit::TestCase
     file = File.open("#{ file_name }", 'rb')
     begin 
       assert_not_nil k_session.upload_file(file, {:path => "/#{ folder }"})['file_id']
-      p k_session.shares("#{ folder }/#{ file_name }").to_s
-      k_session.move("#{ folder }/#{ file_name }", 
-                     "#{ folder }/#{ rename }")
-      assert_not_nil k_session.copy("#{ folder }/#{ rename }", 
-                                    "#{ folder }/#{ copyname }")['file_id']
-      k_session.download_file("#{ folder }/#{ copyname }")do |res|
+      p k_session.shares("/#{ folder }/#{ file_name }").to_s
+      k_session.move("/#{ folder }/#{ file_name }", 
+                     "/#{ folder }/#{ rename }")
+      assert_not_nil k_session.copy("/#{ folder }/#{ rename }", 
+                                    "/#{ folder }/#{ copyname }")['file_id']
+      k_session.download_file("/#{ folder }/#{ copyname }")do |res|
         Dir.mkdir(dir) unless Dir.exist?(dir)
         file = File.open("#{ dir }/#{ copyname }", 'wb')do |f|
           f.write(res.body)
           f.flush
         end
       end
-      # documentView
-      k_session.documentView('txt', "#{ folder }/#{ copyname }")do |res|
+      # document_view
+      k_session.document_view('txt', "#{ folder }/#{ copyname }")do |res|
         p res.body
       end
         

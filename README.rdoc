@@ -9,19 +9,21 @@ To see an example of how it works enter the following into your terminal:
 ----------- 
 = how to use ?
   require 'kuaipan'
-  class YouAPI < Kuaipan::OpenAPI
+  class YourAPI 
+    include Kuaipan::OpenAPI
     def your_method
       # 1 config
       consumer_key = 'YourConsumerKey'
       consumer_secret = 'YourConsumerSecret'
       input_config(consumer_key, consumer_secret)
       
-      # 2 authorize
+      # 2 authorize + get_access_token
       # k_session = g_session() # ok!
       # k_session = g_session(:oauth_callback => 'Your callbake url') # ok!
       # authorize_url = k_session[:authorize_url]
       # user input their username+pwd
       # then you should parse oauth_verifier
+      k_session.set_atoken oauth_verifier
       
       # 3 use Kuaipan API(such as download file, upload file...)
       # please refer to test/test_client.rb

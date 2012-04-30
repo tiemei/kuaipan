@@ -14,13 +14,13 @@ module Kuaipan
 
     def metadata(path ,opts={})
       root = opts[:root] ? opts[:root].to_s : 'app_folder'
-      res = @consumer.get_no_ssl("metadata/#{ root }/#{ path }",opts)
+      res = @consumer.get_no_ssl("metadata/#{ root }#{ path }",opts)
       parse_response(res)
     end
 
     def shares(path, opts={})
       root = opts[:root] ? opts[:root].to_s : 'app_folder'
-      res = @consumer.get_no_ssl("shares/#{ root }/#{ path }",opts)
+      res = @consumer.get_no_ssl("shares/#{ root }#{ path }",opts)
       parse_response(res)
     end
 
@@ -59,7 +59,7 @@ module Kuaipan
     end
     
 
-    def documentView(type, path, opts={},  &block)
+    def document_view(type, path, opts={},  &block)
       raise NoTypeError.new("No type:#{ type }") if Config[:types].index(type.to_s) == nil
       raise NoViewError("No view:#{ opts[:view] }") if (opts[:views] and (Config[:view].index(opts[:view].to_s) == nil))
       res = @consumer.get_no_ssl('fileops/documentView',
@@ -82,7 +82,7 @@ module Kuaipan
 
     def upload_file(file, opts={}) 
       folder = opts[:path]
-      opts[:path] = opts[:path] ? "#{ opts[:path] }/#{ File.basename(file.path) }"
+      opts[:path] = opts[:path] ? "/#{ opts[:path] }/#{ File.basename(file.path) }"
                                 : File.basename(file.path)  
       opts[:root] =  'app_folder' unless opts[:root]
       create_folder((folder ||= ''), :root => opts[:root])

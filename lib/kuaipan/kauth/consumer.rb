@@ -9,6 +9,8 @@ require 'net/http'
 
 module KAuth
   class Consumer
+    attr_accessor :oauth_token, :oauth_token_secret, :user_id
+
     # determine the certificate authority path to verify SSL certs
     CA_FILES = %w(/etc/ssl/certs/ca-certificates.crt /usr/share/curl/curl-ca-bundle.crt /etc/ssl/certs/ca-bundle.trust.crt)
     CA_FILES.each do |ca_file|
