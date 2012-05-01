@@ -1,8 +1,9 @@
 = kuaipan.gem - the third part SDK of kuaipan@kingsoft.com
 To install the gem simply enter:
-  gem install kuaipan --pre
+  gem install kuaipan
 To see an example of how it works enter the following into your terminal:
   git clone git://github.com/tiemei/kuaipan-example.git
+  gem install kuaipan
   cd kuaipan-example
   ruby example.rb
 
