@@ -1,4 +1,5 @@
 # conding: utf-8
+require 'uri'
 module Kuaipan
   class Base
     attr_reader :oauth_token
@@ -14,13 +15,13 @@ module Kuaipan
 
     def metadata(path ,opts={})
       root = opts[:root] ? opts[:root].to_s : 'app_folder'
-      res = @consumer.get_no_ssl("metadata/#{ root }#{ path }",opts)
+      res = @consumer.get_no_ssl(urlencode("metadata/#{ root }#{ path }"),opts)
       parse_response(res)
     end
 
     def shares(path, opts={})
       root = opts[:root] ? opts[:root].to_s : 'app_folder'
-      res = @consumer.get_no_ssl("shares/#{ root }#{ path }",opts)
+      res = @consumer.get_no_ssl(urlencode("shares/#{ root }#{ path }"),opts)
       parse_response(res)
     end
 
@@ -113,6 +114,9 @@ module Kuaipan
 # .......
     
     private 
+      def urlencode(str)
+        URI.escape(str, /([^A-Za-z0-9\-._~])/) 
+      end
       def parse_response(res, &block)
         if res.is_a?(Net::HTTPSuccess)
           if block

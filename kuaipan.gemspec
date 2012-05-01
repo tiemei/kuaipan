@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = 'kuaipan'
-  s.version = '0.0.1.beta.13'
-  s.date = '2012-04-29'
+  s.version = '0.0.3'
+  s.date = '2012-05-01'
   s.summary = "Kuaipan openapi ruby-sdk"
   s.description = "Kuaipan openAPI! With it , you can develop apps which connect to kuaipan@kingsoft"
   s.authors = ["tiemei"]
