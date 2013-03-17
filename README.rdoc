@@ -31,4 +31,6 @@ To see an example of how it works enter the following into your terminal:
       k_session.account_info['user_id'] # get user_id
     end
   end
-    
+ 
+restart to support this API 
+2013-03-17   
